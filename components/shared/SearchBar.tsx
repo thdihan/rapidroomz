@@ -72,7 +72,7 @@ const SearchBar = ({ variant = "hero" }: { variant?: "hero" | "compact" }) => {
                 <Button
                     type="submit"
                     size="lg"
-                    className="h-12 px-8 bg-accent text-accent-foreground hover:bg-accent-700 font-semibold gap-2 rounded-sm"
+                    className="h-12 px-8 bg-accent text-accent-foreground hover:bg-accent-700 cursor-pointer font-semibold gap-2 rounded-sm"
                 >
                     <Search className="h-4 w-4" />
                     Search
