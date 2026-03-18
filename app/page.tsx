@@ -1,23 +1,8 @@
 import HotelCard from "@/components/hotels/HotelCard";
+import Footer from "@/components/shared/Footer";
 import SearchBar from "@/components/shared/SearchBar";
-import { Button } from "@/components/ui/button";
-import { mockHotels } from "@/data/mocdata";
-import {
-    Shield,
-    Clock,
-    Award,
-    Headphones,
-    ArrowRight,
-    LocateIcon,
-    LocationEdit,
-    MapIcon,
-    Map,
-    LocateFixedIcon,
-    MapPin,
-    Star,
-    StarHalf,
-} from "lucide-react";
-import Image from "next/image";
+import { mockHotels, popularDestinations } from "@/data/mocdata";
+import { Shield, Clock, Award, Headphones, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 const features = [
@@ -113,6 +98,46 @@ export default function Home() {
                         ))}
                 </div>
             </section>
+
+            {/* popular destination  */}
+            <section className="container py-12">
+                <div className="flex justify-between items-center">
+                    <div className="text-left">
+                        <h2 className="text-2xl font-semibold">
+                            Popular Destinations
+                        </h2>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mt-4">
+                    {popularDestinations.map((dest) => (
+                        <Link
+                            key={dest.name}
+                            href={`/hotels?destination=${dest.name}`}
+                            className="group"
+                        >
+                            <div className="relative rounded-lg overflow-hidden aspect-4/3">
+                                <img
+                                    src={dest.image}
+                                    alt={dest.name}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                                <div className="absolute inset-0 bg-linear-to-t from-foreground/70 to-transparent" />
+                                <div className="absolute bottom-3 left-3 text-left">
+                                    <h3 className="text-sm font-semibold text-primary-foreground">
+                                        {dest.name}
+                                    </h3>
+                                    <p className="text-xs text-primary-foreground/70">
+                                        {dest.hotels} hotels
+                                    </p>
+                                </div>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            </section>
+
+            <Footer />
         </div>
     );
 }

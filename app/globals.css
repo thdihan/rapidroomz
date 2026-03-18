@@ -53,7 +53,7 @@
 
 :root {
     --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
+    --foreground: #151e28;
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
@@ -143,5 +143,4 @@
 .container {
     max-width: 1280px;
     margin: 0 auto;
-    text-align: center;
 }
