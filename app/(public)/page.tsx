@@ -30,7 +30,7 @@ const features = [
 
 export default function Home() {
     return (
-        <div className="bg-[#F9FAFB]">
+        <div>
             {/* hero */}
             <section className="relative bg-primary overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1600&h=800&fit=crop')] bg-cover bg-center opacity-20" />
