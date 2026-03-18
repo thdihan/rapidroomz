@@ -49,7 +49,7 @@ const Navbar = ({ isLoggedIn = true }: Props) => {
                 {/* buttons  */}
                 {isLoggedIn && (
                     <div className="space-x-2 flex items-center">
-                        <Link href={`/`}>
+                        <Link href={`/login`}>
                             <Button
                                 variant="outline"
                                 className="rounded-sm py-5 px-4 h-9 cursor-pointer"
@@ -58,7 +58,7 @@ const Navbar = ({ isLoggedIn = true }: Props) => {
                                 Sign In
                             </Button>
                         </Link>
-                        <Link href={`/`}>
+                        <Link href={`/signup`}>
                             <Button className="bg-primary rounded-sm py-5 px-4 h-9 hover:bg-primary/90 cursor-pointer">
                                 Sign up
                             </Button>
