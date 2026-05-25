@@ -1,14 +1,17 @@
 import Footer from "@/components/shared/Footer";
 import Navbar from "@/components/shared/Navbar";
+import { auth } from "@/auth";
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const session = await auth();
+
     return (
         <div>
-            <Navbar />
+            <Navbar user={session?.user} />
             {children}
             <Footer />
         </div>

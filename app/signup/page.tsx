@@ -1,14 +1,64 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { inter } from "../layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { toast } from "sonner";
 
-function page() {
+export default function SignupPage() {
+    const router = useRouter();
+    const [isPending, setIsPending] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsPending(true);
+
+        const formData = new FormData(e.currentTarget);
+        const name = formData.get("name") as string;
+        const email = formData.get("email") as string;
+        const phone = formData.get("phone") as string;
+        const password = formData.get("password") as string;
+        const confirmPassword = formData.get("confirmPassword") as string;
+
+        if (password !== confirmPassword) {
+            toast.error("Passwords do not match");
+            setIsPending(false);
+            return;
+        }
+
+        try {
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ name, email, phone, password }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                toast.error(data.message || "Registration failed");
+                return;
+            }
+
+            toast.success("Account created successfully!");
+            router.push("/login");
+        } catch (error) {
+            console.error(error);
+            toast.error("An unexpected error occurred.");
+        } finally {
+            setIsPending(false);
+        }
+    };
+
     return (
-        <div className="w-full h-screen flex items-center justify-center flex-col">
+        <div className="w-full min-h-screen flex items-center justify-center flex-col py-12">
             <div className="text-center">
-                <div className={`text-2xl font-bold ${inter.className}`}>
+                <div className="text-2xl font-bold">
                     <span className="text-[#194B7C]">Rapid</span>
                     <span className="text-[#0168AA]">Roomz</span>
                 </div>
@@ -17,71 +67,86 @@ function page() {
                     Start booking your perfect stays
                 </p>
             </div>
-            <div className="bg-white w-full max-w-md  p-6 border rounded-sm mt-4">
-                <form>
+            <div className="bg-white w-full max-w-md p-6 border rounded-sm mt-4">
+                <form onSubmit={handleSubmit}>
                     <FieldGroup>
                         <Field>
-                            <FieldLabel htmlFor="fieldgroup-name">
-                                Name
-                            </FieldLabel>
+                            <FieldLabel htmlFor="name">Name</FieldLabel>
                             <Input
-                                id="fieldgroup-name"
+                                id="name"
+                                name="name"
+                                required
                                 placeholder="Jordan Lee"
                                 className="rounded-sm py-6 focus-visible:ring-primary"
                             />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="fieldgroup-email">
-                                Email
-                            </FieldLabel>
+                            <FieldLabel htmlFor="email">Email</FieldLabel>
                             <Input
-                                id="fieldgroup-email"
+                                id="email"
+                                name="email"
                                 type="email"
+                                required
                                 placeholder="name@example.com"
                                 className="rounded-sm py-6 focus-visible:ring-primary"
                             />
                         </Field>
 
                         <Field>
-                            <FieldLabel htmlFor="fieldgroup-password">
-                                Password
-                            </FieldLabel>
+                            <FieldLabel htmlFor="phone">Phone</FieldLabel>
                             <Input
-                                id="fieldgroup-password"
+                                id="phone"
+                                name="phone"
+                                type="tel"
+                                required
+                                placeholder="+1 (555) 000-0000"
+                                className="rounded-sm py-6 focus-visible:ring-primary"
+                            />
+                        </Field>
+
+                        <Field>
+                            <FieldLabel htmlFor="password">Password</FieldLabel>
+                            <Input
+                                id="password"
+                                name="password"
                                 type="password"
+                                required
                                 placeholder="********"
                                 className="rounded-sm py-6 focus-visible:ring-primary "
                             />
                         </Field>
 
                         <Field>
-                            <FieldLabel htmlFor="fieldgroup-password">
+                            <FieldLabel htmlFor="confirmPassword">
                                 Confirm Password
                             </FieldLabel>
                             <Input
-                                id="fieldgroup-password"
+                                id="confirmPassword"
+                                name="confirmPassword"
                                 type="password"
+                                required
                                 placeholder="********"
                                 className="rounded-sm py-6 focus-visible:ring-primary "
                             />
                         </Field>
 
-                        <Field orientation="horizontal">
+                        <Field orientation="horizontal" className="pt-2">
                             <Button
                                 type="submit"
+                                disabled={isPending}
                                 className="rounded-sm w-full py-6 cursor-pointer hover:bg-primary/85 font-semibold"
                             >
-                                Sign In
+                                {isPending ? "Creating Account..." : "Sign Up"}
                             </Button>
                         </Field>
                     </FieldGroup>
                 </form>
 
-                <div className="inset-0 bg-muted my-4 h-1"></div>
+                <div className="inset-0 bg-muted my-4 h-[1px]"></div>
 
                 <p className="text-center text-sm text-muted-foreground space-x-2">
                     <span>Already have an account?</span>
-                    <Link href={"/login"} className="text-primary">
+                    <Link href={"/login"} className="text-primary font-medium">
                         Sign In
                     </Link>
                 </p>
@@ -89,5 +154,3 @@ function page() {
         </div>
     );
 }
-
-export default page;

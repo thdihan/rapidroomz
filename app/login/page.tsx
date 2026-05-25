@@ -1,14 +1,53 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { inter } from "../layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { toast } from "sonner";
 
-function page() {
+export default function LoginPage() {
+    const router = useRouter();
+    const [isPending, setIsPending] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsPending(true);
+
+        const formData = new FormData(e.currentTarget);
+        const email = formData.get("email") as string;
+        const password = formData.get("password") as string;
+
+        try {
+            const res = await signIn("credentials", {
+                email,
+                password,
+                redirect: false,
+            });
+
+            if (res?.error) {
+                toast.error("Invalid email or password");
+                setIsPending(false);
+                return;
+            }
+
+            toast.success("Welcome back!");
+            router.push("/");
+            router.refresh();
+        } catch (error) {
+            console.error(error);
+            toast.error("An unexpected error occurred.");
+            setIsPending(false);
+        }
+    };
+
     return (
         <div className="w-full h-screen flex items-center justify-center flex-col">
             <div className="text-center">
-                <div className={`text-2xl font-bold ${inter.className}`}>
+                <div className="text-2xl font-bold">
                     <span className="text-[#194B7C]">Rapid</span>
                     <span className="text-[#0168AA]">Roomz</span>
                 </div>
@@ -17,23 +56,23 @@ function page() {
                     Sign in to your account
                 </p>
             </div>
-            <div className="bg-white w-full max-w-md  p-6 border rounded-sm mt-4">
-                <form>
+            <div className="bg-white w-full max-w-md p-6 border rounded-sm mt-4">
+                <form onSubmit={handleSubmit}>
                     <FieldGroup>
                         <Field>
-                            <FieldLabel htmlFor="fieldgroup-email">
-                                Email
-                            </FieldLabel>
+                            <FieldLabel htmlFor="email">Email</FieldLabel>
                             <Input
-                                id="fieldgroup-email"
+                                id="email"
+                                name="email"
                                 type="email"
+                                required
                                 placeholder="name@example.com"
                                 className="rounded-sm py-6 focus-visible:ring-primary"
                             />
                         </Field>
                         <Field>
                             <FieldLabel
-                                htmlFor="fieldgroup-password"
+                                htmlFor="password"
                                 className="flex justify-between"
                             >
                                 <span>Password</span>{" "}
@@ -45,28 +84,31 @@ function page() {
                                 </Link>
                             </FieldLabel>
                             <Input
-                                id="fieldgroup-password"
+                                id="password"
+                                name="password"
                                 type="password"
+                                required
                                 placeholder="******"
                                 className="rounded-sm py-6 focus-visible:ring-primary"
                             />
                         </Field>
-                        <Field orientation="horizontal">
+                        <Field orientation="horizontal" className="pt-2">
                             <Button
                                 type="submit"
+                                disabled={isPending}
                                 className="rounded-sm w-full py-6 cursor-pointer hover:bg-primary/85 font-semibold"
                             >
-                                Sign In
+                                {isPending ? "Signing In..." : "Sign In"}
                             </Button>
                         </Field>
                     </FieldGroup>
                 </form>
 
-                <div className="inset-0 bg-muted my-4 h-1"></div>
+                <div className="inset-0 bg-muted my-4 h-[1px]"></div>
 
                 <p className="text-center text-sm text-muted-foreground">
                     Don&apos;t have an account?{" "}
-                    <Link href={`/signup`} className="text-primary">
+                    <Link href={`/signup`} className="text-primary font-medium">
                         Sign Up
                     </Link>
                 </p>
@@ -74,5 +116,3 @@ function page() {
         </div>
     );
 }
-
-export default page;

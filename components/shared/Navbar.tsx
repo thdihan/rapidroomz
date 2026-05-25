@@ -1,19 +1,22 @@
 import Link from "next/link";
 import React from "react";
 import { Button } from "../ui/button";
-import { inter } from "@/app/layout";
 import { User } from "lucide-react";
+import UserMenu from "./UserMenu";
 
 type Props = {
-    isLoggedIn?: boolean;
+    user?: {
+        name?: string | null;
+        email?: string | null;
+    } | null;
 };
 
-const Navbar = ({ isLoggedIn = true }: Props) => {
+const Navbar = ({ user }: Props) => {
     return (
         <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm flex justify-center">
             <div className="container flex items-center justify-between h-16">
                 {/* logo  */}
-                <div className={`text-2xl font-bold ${inter.className}`}>
+                <div className="text-2xl font-bold">
                     <span className="text-[#194B7C]">Rapid</span>
                     <span className="text-[#0168AA]">Roomz</span>
                 </div>
@@ -47,7 +50,9 @@ const Navbar = ({ isLoggedIn = true }: Props) => {
                 </nav>
 
                 {/* buttons  */}
-                {isLoggedIn && (
+                {user ? (
+                    <UserMenu user={user} />
+                ) : (
                     <div className="space-x-2 flex items-center">
                         <Link href={`/login`}>
                             <Button
