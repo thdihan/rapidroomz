@@ -28,7 +28,79 @@ const features = [
     },
 ];
 
-export default function Home() {
+export default async function Home() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+    
+    // Fetch all properties
+    const [hotelRes, villaRes, aptRes, resortRes] = await Promise.all([
+        fetch(`${apiUrl}/hotel`, { next: { revalidate: 0 } }).catch(() => null),
+        fetch(`${apiUrl}/villa`, { next: { revalidate: 0 } }).catch(() => null),
+        fetch(`${apiUrl}/apartment`, { next: { revalidate: 0 } }).catch(() => null),
+        fetch(`${apiUrl}/resort`, { next: { revalidate: 0 } }).catch(() => null),
+    ]);
+
+    const hotelsData = hotelRes && hotelRes.ok ? await hotelRes.json() : { data: [] };
+    const villasData = villaRes && villaRes.ok ? await villaRes.json() : { data: [] };
+    const aptsData = aptRes && aptRes.ok ? await aptRes.json() : { data: [] };
+    const resortsData = resortRes && resortRes.ok ? await resortRes.json() : { data: [] };
+
+    const allProperties = [
+        ...(hotelsData.data || []).map((h: any) => ({
+            id: h._id,
+            name: h.name,
+            type: "hotel",
+            location: h.address ? `${h.address.city}, ${h.address.country}` : "N/A",
+            rating: h.starRating || 5,
+            reviews: Math.floor(Math.random() * 200) + 10,
+            price: 150,
+            image: h.images?.[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=450&fit=crop',
+            amenities: h.amenities || ["WiFi", "Pool"],
+            featured: h.isFeatured || false
+        })),
+        ...(villasData.data || []).map((v: any) => ({
+            id: v._id,
+            name: v.propertyName,
+            type: "villa",
+            location: v.address ? `${v.address.city}, ${v.address.country}` : "N/A",
+            rating: 5,
+            reviews: Math.floor(Math.random() * 100) + 5,
+            price: v.propertyDetails?.basePrice || 200,
+            image: v.images?.[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=450&fit=crop',
+            amenities: v.indoorAmenities || ["WiFi"],
+            featured: v.isFeatured || false
+        })),
+        ...(aptsData.data || []).map((a: any) => ({
+            id: a._id,
+            name: a.propertyName,
+            type: "apartment",
+            location: a.address ? `${a.address.city}, ${a.address.country}` : "N/A",
+            rating: 4.5,
+            reviews: Math.floor(Math.random() * 80) + 5,
+            price: a.propertyDetails?.basePrice || 100,
+            image: a.images?.[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=450&fit=crop',
+            amenities: a.amenities || ["WiFi"],
+            featured: a.isFeatured || false
+        })),
+        ...(resortsData.data || []).map((r: any) => ({
+            id: r._id,
+            name: r.propertyName,
+            type: "resort",
+            location: r.address ? `${r.address.city}, ${r.address.country}` : "N/A",
+            rating: r.starRating || 5,
+            reviews: Math.floor(Math.random() * 300) + 50,
+            price: 250,
+            image: r.images?.[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=450&fit=crop',
+            amenities: r.features || ["WiFi", "Pool", "Spa"],
+            featured: r.isFeatured || false
+        }))
+    ];
+
+    let featuredProperties = allProperties.filter(p => p.featured === true).slice(0, 8);
+    // Fallback to mock data if no properties exist at all (backend empty/offline)
+    if (allProperties.length === 0) {
+        featuredProperties = mockHotels.filter((m) => m.featured === true);
+    }
+
     return (
         <div>
             {/* hero */}
@@ -91,11 +163,15 @@ export default function Home() {
 
                 {/* Featured Hotels */}
                 <div className="py-8 grid grid-cols-2 md:grid-cols-4 gap-6">
-                    {mockHotels
-                        ?.filter((m) => m.featured === true)
-                        .map((m, index) => (
+                    {featuredProperties.length > 0 ? (
+                        featuredProperties.map((m, index) => (
                             <HotelCard hotel={m} key={index} />
-                        ))}
+                        ))
+                    ) : (
+                        <div className="col-span-2 md:col-span-4 text-center py-10 text-muted-foreground border rounded-lg bg-gray-50/50">
+                            No featured properties available at the moment.
+                        </div>
+                    )}
                 </div>
             </section>
 

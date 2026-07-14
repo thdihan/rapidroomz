@@ -8,6 +8,7 @@ export interface Hotel {
     image: string;
     amenities: string[];
     featured?: boolean;
+    type?: "hotel" | "villa" | "apartment" | "resort";
 }
 
 export const mockHotels: Hotel[] = [
@@ -21,6 +22,7 @@ export const mockHotels: Hotel[] = [
         image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&h=450&fit=crop",
         amenities: ["Pool", "Spa", "Beach", "WiFi"],
         featured: true,
+        type: "resort",
     },
     {
         id: "2",
@@ -32,6 +34,7 @@ export const mockHotels: Hotel[] = [
         image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=600&h=450&fit=crop",
         amenities: ["Gym", "Restaurant", "WiFi", "Bar"],
         featured: true,
+        type: "hotel",
     },
     {
         id: "3",
@@ -43,6 +46,7 @@ export const mockHotels: Hotel[] = [
         image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=600&h=450&fit=crop",
         amenities: ["Garden", "WiFi", "Breakfast", "Onsen"],
         featured: true,
+        type: "villa",
     },
     {
         id: "4",
@@ -53,6 +57,7 @@ export const mockHotels: Hotel[] = [
         price: 320,
         image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&h=450&fit=crop",
         amenities: ["Ski", "Fireplace", "Spa", "WiFi"],
+        type: "resort",
     },
     {
         id: "5",
@@ -63,6 +68,7 @@ export const mockHotels: Hotel[] = [
         price: 145,
         image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=600&h=450&fit=crop",
         amenities: ["Pool", "Beach", "WiFi", "Yoga"],
+        type: "villa",
     },
     {
         id: "6",
@@ -73,6 +79,7 @@ export const mockHotels: Hotel[] = [
         price: 230,
         image: "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=600&h=450&fit=crop",
         amenities: ["Restaurant", "WiFi", "Bar", "Terrace"],
+        type: "hotel",
     },
     {
         id: "7",
@@ -84,6 +91,7 @@ export const mockHotels: Hotel[] = [
         image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&h=450&fit=crop",
         amenities: ["Pool", "Spa", "Restaurant", "WiFi"],
         featured: true,
+        type: "resort",
     },
     {
         id: "8",
@@ -94,6 +102,7 @@ export const mockHotels: Hotel[] = [
         price: 195,
         image: "https://images.unsplash.com/photo-1602002418082-a4443e081dd1?w=600&h=450&fit=crop",
         amenities: ["Pool", "View", "WiFi", "Breakfast"],
+        type: "apartment",
     },
 ];
 

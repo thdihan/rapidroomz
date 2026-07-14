@@ -1,6 +1,7 @@
 import Footer from "@/components/shared/Footer";
 import Navbar from "@/components/shared/Navbar";
 import { auth } from "@/auth";
+import NextAuthProvider from "@/components/shared/NextAuthProvider";
 
 export default async function RootLayout({
     children,
@@ -10,10 +11,12 @@ export default async function RootLayout({
     const session = await auth();
 
     return (
-        <div>
-            <Navbar user={session?.user} />
-            {children}
-            <Footer />
-        </div>
+        <NextAuthProvider>
+            <div>
+                <Navbar user={session?.user} />
+                {children}
+                <Footer />
+            </div>
+        </NextAuthProvider>
     );
 }

@@ -31,9 +31,27 @@ const Navbar = ({ user }: Props) => {
                     </Link>
                     <Link
                         className="px-4 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
-                        href="/hotels"
+                        href="/properties?type=hotel"
                     >
                         Hotels
+                    </Link>
+                    <Link
+                        className="px-4 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+                        href="/properties?type=villa"
+                    >
+                        Villas
+                    </Link>
+                    <Link
+                        className="px-4 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+                        href="/properties?type=apartment"
+                    >
+                        Apartments
+                    </Link>
+                    <Link
+                        className="px-4 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"
+                        href="/properties?type=resort"
+                    >
+                        Resorts
                     </Link>
                     <Link
                         className="px-4 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-muted"

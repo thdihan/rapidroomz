@@ -3,17 +3,51 @@ import { useState } from "react";
 import { Search, MapPin, Calendar, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
-const SearchBar = ({ variant = "hero" }: { variant?: "hero" | "compact" }) => {
+type SearchBarProps = {
+    variant?: "hero" | "compact";
+    onSubmit?: (query: URLSearchParams) => void;
+};
+
+const SearchBar = ({ variant = "hero", onSubmit }: SearchBarProps) => {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [destination, setDestination] = useState("");
     const [checkIn, setCheckIn] = useState("");
     const [checkOut, setCheckOut] = useState("");
     const [guests, setGuests] = useState("2");
 
+    useEffect(() => {
+        if (searchParams) {
+            setDestination(searchParams.get("location") || "");
+            setCheckIn(searchParams.get("checkIn") || "");
+            setCheckOut(searchParams.get("checkOut") || "");
+            setGuests(searchParams.get("guests") || "2");
+        }
+    }, [searchParams]);
+
     const isHero = variant === "hero";
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const query = new URLSearchParams();
+        if (destination) query.append("location", destination);
+        if (checkIn) query.append("checkIn", checkIn);
+        if (checkOut) query.append("checkOut", checkOut);
+        if (guests) query.append("guests", guests);
+        
+        if (onSubmit) {
+            onSubmit(query);
+        } else {
+            router.push(`/properties?${query.toString()}`);
+        }
+    };
 
     return (
         <form
+            onSubmit={handleSubmit}
             className={`bg-card rounded-lg border border-border shadow-lg ${
                 isHero ? "p-4 md:p-6" : "p-3"
             }`}
