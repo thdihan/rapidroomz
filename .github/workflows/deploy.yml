@@ -74,4 +74,4 @@ jobs:
             docker stop rapidroomz-frontend || true
             docker rm rapidroomz-frontend || true
             echo "Starting new container"
-            docker run -d --name rapidroomz-frontend --restart unless-stopped -p 3000:3000 --env-file ~/rapidroomz/secrets/frontend/.env ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            docker run -d --name rapidroomz-frontend --restart unless-stopped -p 3000:3000 --env-file ~/rapidroomz/secrets/frontend/.env -v ~/rapidroomz/frontend/public/images:/app/public/images ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
