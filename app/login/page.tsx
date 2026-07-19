@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -46,11 +47,18 @@ export default function LoginPage() {
 
     return (
         <div className="w-full h-screen flex items-center justify-center flex-col">
+            <Link
+                href="/"
+                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 group"
+            >
+                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                Cancel / Back to Home
+            </Link>
             <div className="text-center">
-                <div className="text-2xl font-bold">
+                <Link href="/" className="text-2xl font-bold">
                     <span className="text-[#194B7C]">Rapid</span>
                     <span className="text-[#0168AA]">Roomz</span>
-                </div>
+                </Link>
                 <h2 className="text-2xl font-semibold mt-2">Welcome Back!</h2>
                 <p className="text-sm text-muted-foreground">
                     Sign in to your account
