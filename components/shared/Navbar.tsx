@@ -16,10 +16,10 @@ const Navbar = ({ user }: Props) => {
         <header className="sticky top-0 z-50 bg-card border-b border-border shadow-sm flex justify-center">
             <div className="container flex items-center justify-between h-16">
                 {/* logo  */}
-                <div className="text-2xl font-bold">
+                <Link href="/" className="text-2xl font-bold">
                     <span className="text-[#194B7C]">Rapid</span>
                     <span className="text-[#0168AA]">Roomz</span>
-                </div>
+                </Link>
 
                 {/* menu  */}
                 <nav className="hidden md:flex items-center gap-1">
