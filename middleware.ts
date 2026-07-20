@@ -8,6 +8,14 @@ export default auth((req) => {
 
   const isAuthRoute = ["/login", "/signup"].includes(nextUrl.pathname);
   const isDashboardRoute = nextUrl.pathname.startsWith("/dashboard");
+  const isProfileRoute = nextUrl.pathname === "/profile";
+
+  if (isProfileRoute) {
+    if (!isLoggedIn) {
+      return NextResponse.redirect(new URL("/login", nextUrl));
+    }
+    return NextResponse.redirect(new URL("/dashboard/profile", nextUrl));
+  }
 
   if (isAuthRoute) {
     if (isLoggedIn) {
@@ -26,6 +34,6 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/login", "/signup", "/dashboard/:path*"],
+  matcher: ["/login", "/signup", "/profile", "/dashboard/:path*"],
 };
 

@@ -64,6 +64,15 @@ export default function UserMenu({ user }: UserMenuProps) {
             Dashboard
           </Link>
 
+          <Link
+            href="/dashboard/profile"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors font-medium"
+          >
+            <User className="size-4" />
+            My Profile
+          </Link>
+
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium text-left cursor-pointer border-t border-border"

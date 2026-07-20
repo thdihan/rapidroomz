@@ -102,6 +102,7 @@ export default function DashboardSidebar({
           { label: "Contact Info", href: "/dashboard/settings?tab=contact_info", icon: Phone },
         ],
       },
+      { label: "My Profile", href: "/dashboard/profile", icon: User },
     ],
     owner: [
       { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -109,6 +110,7 @@ export default function DashboardSidebar({
       { label: "Bookings Received", href: "/dashboard/bookings-received", icon: CalendarRange },
       { label: "Revenue & Earnings", href: "/dashboard/revenue", icon: Wallet },
       { label: "Payment History", href: "/dashboard/payment-history", icon: CreditCard },
+      { label: "My Profile", href: "/dashboard/profile", icon: User },
     ],
     user: [
       { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
