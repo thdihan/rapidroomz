@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,15 @@ export default function LoginPage() {
             }
 
             toast.success("Welcome back!");
-            router.push("/");
+
+            const session = await getSession();
+            const role = (session?.user as any)?.role;
+
+            if (role === "owner" || role === "admin") {
+                router.push("/dashboard");
+            } else {
+                router.push("/");
+            }
             router.refresh();
         } catch (error) {
             console.error(error);
