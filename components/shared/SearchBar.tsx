@@ -1,10 +1,10 @@
 "use client";
-import { useState } from "react";
-import { Search, MapPin, Calendar, Users } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 
 type SearchBarProps = {
     variant?: "hero" | "compact";
@@ -53,7 +53,7 @@ const SearchBar = ({ variant = "hero", onSubmit }: SearchBarProps) => {
             }`}
         >
             <div
-                className={`grid gap-3 ${isHero ? "md:grid-cols-[1fr_1fr_1fr_auto_auto]" : "md:grid-cols-[1fr_1fr_1fr_auto_auto]"}`}
+                className={`grid gap-3 ${isHero ? "md:grid-cols-[1.2fr_1.8fr_auto_auto]" : "md:grid-cols-[1.2fr_1.8fr_auto_auto]"}`}
             >
                 {/* Destination */}
                 <div className="relative">
@@ -62,31 +62,19 @@ const SearchBar = ({ variant = "hero", onSubmit }: SearchBarProps) => {
                         placeholder="Where are you going?"
                         value={destination}
                         onChange={(e) => setDestination(e.target.value)}
-                        className="pl-10 bg-muted border-0 h-12 focus-visible:ring-blue-500"
+                        className="pl-10 bg-muted border-0 h-12 focus-visible:ring-blue-500 rounded-md"
                     />
                 </div>
 
-                {/* Check-in */}
-                <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        type="date"
-                        placeholder="Check-in"
-                        value={checkIn}
-                        onChange={(e) => setCheckIn(e.target.value)}
-                        className="pl-10 bg-muted border-0 h-12 focus-visible:ring-blue-500"
-                    />
-                </div>
-
-                {/* Check-out */}
-                <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        type="date"
-                        placeholder="Check-out"
-                        value={checkOut}
-                        onChange={(e) => setCheckOut(e.target.value)}
-                        className="pl-10 bg-muted border-0 h-12 focus-visible:ring-blue-500"
+                {/* Date Range Picker */}
+                <div className="w-full">
+                    <DateRangePicker
+                        checkIn={checkIn}
+                        checkOut={checkOut}
+                        onSelectRange={(inDate, outDate) => {
+                            setCheckIn(inDate);
+                            setCheckOut(outDate);
+                        }}
                     />
                 </div>
 
@@ -99,14 +87,14 @@ const SearchBar = ({ variant = "hero", onSubmit }: SearchBarProps) => {
                         max="10"
                         value={guests}
                         onChange={(e) => setGuests(e.target.value)}
-                        className="pl-10 bg-muted border-0 h-12 w-full md:w-24 focus-visible:ring-blue-500"
+                        className="pl-10 bg-muted border-0 h-12 w-full md:w-24 focus-visible:ring-blue-500 rounded-md"
                     />
                 </div>
 
                 <Button
                     type="submit"
                     size="lg"
-                    className="h-12 px-8 bg-accent text-accent-foreground hover:bg-accent-700 cursor-pointer font-semibold gap-2 rounded-sm"
+                    className="h-12 px-8 bg-accent text-accent-foreground hover:bg-accent-700 cursor-pointer font-semibold gap-2 rounded-md"
                 >
                     <Search className="h-4 w-4" />
                     Search

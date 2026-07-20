@@ -10,6 +10,7 @@ import { useSession, signIn } from "next-auth/react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import SearchBar from "@/components/shared/SearchBar";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 
 export default function PublicSinglePropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
@@ -743,27 +744,16 @@ export default function PublicSinglePropertyPage({ params }: { params: Promise<{
                         <CheckSquare className="size-4" /> {type === 'villa' ? 'Villa' : 'Apartment'} Selected
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-gray-500 uppercase">Check-in</label>
-                          <Input 
-                            type="date" 
-                            min={new Date().toISOString().split('T')[0]}
-                            value={singlePropCheckIn} 
-                            onChange={(e) => setSinglePropCheckIn(e.target.value)}
-                            className="bg-gray-50 h-10"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold text-gray-500 uppercase">Check-out</label>
-                          <Input 
-                            type="date" 
-                            min={singlePropCheckIn || new Date().toISOString().split('T')[0]}
-                            value={singlePropCheckOut} 
-                            onChange={(e) => setSinglePropCheckOut(e.target.value)}
-                            className="bg-gray-50 h-10"
-                          />
-                        </div>
+                      <div className="mb-4">
+                        <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Stay Dates</label>
+                        <DateRangePicker
+                          checkIn={singlePropCheckIn}
+                          checkOut={singlePropCheckOut}
+                          onSelectRange={(inDate, outDate) => {
+                            setSinglePropCheckIn(inDate);
+                            setSinglePropCheckOut(outDate);
+                          }}
+                        />
                       </div>
 
                       <div className="border-t pt-4">
@@ -1105,21 +1095,14 @@ export default function PublicSinglePropertyPage({ params }: { params: Promise<{
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1">Check-in Date</label>
-                  <input 
-                    type="date" 
-                    value={checkIn}
-                    onChange={(e) => setCheckIn(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1">Check-out Date</label>
-                  <input 
-                    type="date" 
-                    value={checkOut}
-                    onChange={(e) => setCheckOut(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Dates of Stay</label>
+                  <DateRangePicker
+                    checkIn={checkIn}
+                    checkOut={checkOut}
+                    onSelectRange={(inDate, outDate) => {
+                      setCheckIn(inDate);
+                      setCheckOut(outDate);
+                    }}
                   />
                 </div>
                 <div>
