@@ -119,7 +119,7 @@ export default function DashboardShell({ initialUser, children }: DashboardShell
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* Top Bar Header */}
-          <header className="h-16 shrink-0 bg-white border-b border-border flex items-center justify-between px-4 sm:px-6 shadow-sm select-none z-10">
+          <header className="h-16 shrink-0 bg-white border-b border-border flex items-center justify-between px-4 sm:px-6 shadow-sm select-none relative z-30">
             <div className="flex items-center gap-3">
               {/* Mobile Menu Toggle */}
               <button

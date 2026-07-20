@@ -175,7 +175,9 @@ export default function SinglePropertyPage({ params }: { params: Promise<{ id: s
     return (
       <div className="p-8 text-center bg-red-50/50 rounded-2xl border border-red-100 max-w-lg mx-auto mt-20">
         <p className="mb-4 text-red-600 font-semibold">{error || "Failed to load property data."}</p>
-        <Button onClick={() => router.back()} className="bg-red-600 hover:bg-red-700 text-white">Go Back</Button>
+        <Button variant="outline" onClick={() => router.back()} className="rounded-md font-semibold cursor-pointer border-slate-200">
+          <ArrowLeft className="size-4 mr-2" /> Go Back
+        </Button>
       </div>
     );
   }
@@ -184,10 +186,10 @@ export default function SinglePropertyPage({ params }: { params: Promise<{ id: s
   const heroImage = info.images?.[0] || "/placeholder-property.jpg";
 
   return (
-    <div className="space-y-8 pb-12 animate-fade-in bg-[#f8fafc] min-h-screen -mx-6 -mt-6">
+    <div className="space-y-8 pb-12 animate-fade-in bg-[#f8fafc] min-h-screen -mx-4 sm:-mx-6 -mt-4 sm:-mt-6">
       
       {/* Immersive Hero Section */}
-      <div className="relative h-[400px] w-full overflow-hidden flex flex-col justify-between">
+      <div className="relative h-[400px] w-full overflow-hidden flex flex-col justify-between rounded-b-2xl">
         {/* Blurred Background Layer */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
@@ -196,12 +198,12 @@ export default function SinglePropertyPage({ params }: { params: Promise<{ id: s
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-slate-900/10 backdrop-blur-[2px]" />
         
         {/* Header Actions */}
-        <div className="relative z-10 px-8 pt-8 flex items-center justify-between">
-          <Button variant="ghost" onClick={() => router.back()} className="rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md transition-all">
+        <div className="relative z-1 px-8 pt-8 flex items-center justify-between">
+          <Button variant="ghost" onClick={() => router.back()} className="rounded-md bg-white/10 hover:bg-white/20 text-white border border-white/30 backdrop-blur-md transition-all font-semibold cursor-pointer shadow-sm">
             <ArrowLeft className="size-4 mr-2" /> Back
           </Button>
-          <Button className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white border-0 shadow-lg shadow-indigo-600/30 font-bold tracking-wide transition-all hover:scale-105" onClick={() => router.push(`/dashboard/properties/edit/${propertyId}?type=${propertyType}`)}>
-            <Edit className="size-4 mr-2" /> Edit Configuration
+          <Button className="rounded-md bg-[#1b5cac] hover:bg-[#1b5cac]/90 text-white font-bold tracking-wide transition-all shadow-sm cursor-pointer flex items-center gap-2 border-0 text-sm" onClick={() => router.push(`/dashboard/properties/edit/${propertyId}?type=${propertyType}`)}>
+            <Edit className="size-4" /> Edit Property Info
           </Button>
         </div>
 
