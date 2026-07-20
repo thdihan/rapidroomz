@@ -59,6 +59,7 @@ export default function DashboardShell({ initialUser, children }: DashboardShell
       "bookings-received": "Bookings Received",
       "users": "User Directory",
       "settings": "Platform Settings",
+      "customer-queries": "Customer Queries",
       "revenue": "Revenue & Earnings",
       "my-bookings": "My Bookings",
       "saved": "Saved Hotels",

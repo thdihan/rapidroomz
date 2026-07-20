@@ -23,18 +23,21 @@ const Footer = () => {
                             Quick Links
                         </h4>
                         <ul className="space-y-2">
-                            {["Hotels", "About Us", "Contact", "FAQ"].map(
-                                (item) => (
-                                    <li key={item}>
-                                        <Link
-                                            href={`/${item.toLowerCase().replace(/\s/g, "-")}`}
-                                            className="text-sm opacity-70 hover:opacity-100 transition-opacity"
-                                        >
-                                            {item}
-                                        </Link>
-                                    </li>
-                                ),
-                            )}
+                            {[
+                                { name: "Hotels", href: "/properties?type=hotel" },
+                                { name: "About Us", href: "/about" },
+                                { name: "Contact", href: "/contact" },
+                                { name: "FAQ", href: "/contact" },
+                            ].map((item) => (
+                                <li key={item.name}>
+                                    <Link
+                                        href={item.href}
+                                        className="text-sm opacity-70 hover:opacity-100 transition-opacity"
+                                    >
+                                        {item.name}
+                                    </Link>
+                                </li>
+                            ))}
                         </ul>
                     </div>
 

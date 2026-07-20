@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   LayoutDashboard,
   Hotel,
@@ -14,14 +15,25 @@ import {
   User,
   X,
   Building,
+  ChevronDown,
+  FileText,
+  Phone,
+  MessageSquare,
 } from "lucide-react";
 
 export type UserRole = "admin" | "owner" | "user";
+
+interface SubSidebarItem {
+  label: string;
+  href: string;
+  icon?: React.ComponentType<{ className?: string }>;
+}
 
 interface SidebarItem {
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
+  children?: SubSidebarItem[];
 }
 
 interface DashboardSidebarProps {
@@ -35,6 +47,43 @@ export default function DashboardSidebar({
   activePath,
   onCloseMobile,
 }: DashboardSidebarProps) {
+  const searchParams = useSearchParams();
+  const activeTab = searchParams.get("tab") || "about";
+
+  // State to track expanded sub-menus (default settings open if on settings path)
+  const [openSubMenus, setOpenSubMenus] = useState<Record<string, boolean>>({
+    "/dashboard/settings": true,
+  });
+
+  // State for unread customer queries count badge
+  const [unreadQueriesCount, setUnreadQueriesCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (role === "admin") {
+      const fetchUnreadCount = async () => {
+        try {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+          const res = await fetch(`${apiUrl}/contact`);
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data)) {
+            const unread = json.data.filter((m: any) => m.status === "unread").length;
+            setUnreadQueriesCount(unread);
+          }
+        } catch (err) {
+          console.error("Error fetching unread queries count:", err);
+        }
+      };
+      fetchUnreadCount();
+    }
+  }, [role, activePath]);
+
+  const toggleSubMenu = (href: string) => {
+    setOpenSubMenus((prev) => ({
+      ...prev,
+      [href]: !prev[href],
+    }));
+  };
+
   // Define menu options for each role
   const menuItems: Record<UserRole, SidebarItem[]> = {
     admin: [
@@ -43,7 +92,16 @@ export default function DashboardSidebar({
       { label: "Manage Bookings", href: "/dashboard/bookings", icon: CalendarRange },
       { label: "User Directory", href: "/dashboard/users", icon: Users },
       { label: "Payment History", href: "/dashboard/payment-history", icon: CreditCard },
-      { label: "Platform Settings", href: "/dashboard/settings", icon: Settings },
+      { label: "Customer Queries", href: "/dashboard/customer-queries", icon: MessageSquare },
+      {
+        label: "Platform Settings",
+        href: "/dashboard/settings",
+        icon: Settings,
+        children: [
+          { label: "About Us Content", href: "/dashboard/settings?tab=about", icon: FileText },
+          { label: "Contact Info", href: "/dashboard/settings?tab=contact_info", icon: Phone },
+        ],
+      },
     ],
     owner: [
       { label: "Overview", href: "/dashboard", icon: LayoutDashboard },
@@ -68,7 +126,14 @@ export default function DashboardSidebar({
     if (href === "/dashboard") {
       return activePath === "/dashboard";
     }
-    return activePath.startsWith(href);
+    return activePath.startsWith(href.split("?")[0]);
+  };
+
+  const isSubItemActive = (subHref: string) => {
+    const urlParams = new URLSearchParams(subHref.split("?")[1] || "");
+    const subTab = urlParams.get("tab");
+    if (!subTab) return false;
+    return activePath.startsWith("/dashboard/settings") && activeTab === subTab;
   };
 
   return (
@@ -110,33 +175,95 @@ export default function DashboardSidebar({
 
           {items.map((item, index) => {
             const isActive = isItemActive(item.href);
+            const hasChildren = item.children && item.children.length > 0;
+            const isOpen = openSubMenus[item.href] ?? true;
             const Icon = item.icon;
+            const isQueriesItem = item.href === "/dashboard/customer-queries";
 
             return (
-              <Link
-                key={index}
-                href={item.href}
-                onClick={onCloseMobile}
-                className={`group flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-semibold transition-all relative ${
-                  isActive
-                    ? "bg-[#1b5cac]/5 text-[#1b5cac] font-bold"
-                    : "text-muted-foreground hover:text-foreground hover:bg-slate-50"
-                }`}
-              >
-                {/* Active Indicator bar */}
-                {isActive && (
-                  <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-md bg-[#1b5cac]" />
-                )}
-
-                <Icon
-                  className={`size-4.5 shrink-0 transition-colors ${
+              <div key={index} className="space-y-0.5">
+                <Link
+                  href={item.href}
+                  onClick={() => {
+                    if (hasChildren) {
+                      toggleSubMenu(item.href);
+                    }
+                    if (onCloseMobile) onCloseMobile();
+                  }}
+                  className={`group flex items-center justify-between px-3 py-2.5 rounded-md text-sm font-semibold transition-all relative cursor-pointer ${
                     isActive
-                      ? "text-[#1b5cac]"
-                      : "text-muted-foreground group-hover:text-foreground"
+                      ? "bg-[#1b5cac]/5 text-[#1b5cac] font-bold"
+                      : "text-muted-foreground hover:text-foreground hover:bg-slate-50"
                   }`}
-                />
-                <span>{item.label}</span>
-              </Link>
+                >
+                  {/* Active Indicator bar */}
+                  {isActive && (
+                    <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-md bg-[#1b5cac]" />
+                  )}
+
+                  <div className="flex items-center gap-3">
+                    <Icon
+                      className={`size-4.5 shrink-0 transition-colors ${
+                        isActive
+                          ? "text-[#1b5cac]"
+                          : "text-muted-foreground group-hover:text-foreground"
+                      }`}
+                    />
+                    <span>{item.label}</span>
+                  </div>
+
+                  {/* Unread Queries Badge */}
+                  {isQueriesItem && unreadQueriesCount > 0 && (
+                    <span className="bg-red-500 text-white text-[10px] font-bold h-4 min-w-4 px-1.5 rounded-full flex items-center justify-center shadow-xs">
+                      {unreadQueriesCount}
+                    </span>
+                  )}
+
+                  {hasChildren && (
+                    <ChevronDown
+                      className={`size-4 text-muted-foreground transition-transform duration-200 ${
+                        isOpen ? "rotate-0" : "-rotate-90"
+                      }`}
+                    />
+                  )}
+                </Link>
+
+                {/* Sub-menu Items with Smooth Accordion Transition */}
+                {hasChildren && (
+                  <div
+                    className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+                      isOpen
+                        ? "grid-rows-[1fr] opacity-100 py-0.5"
+                        : "grid-rows-[0fr] opacity-0 py-0"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="pl-3.5 ml-4 space-y-1 py-1 border-l border-slate-200/80">
+                        {item.children!.map((sub, subIndex) => {
+                          const isSubActive = isSubItemActive(sub.href);
+                          const SubIcon = sub.icon;
+
+                          return (
+                            <Link
+                              key={subIndex}
+                              href={sub.href}
+                              onClick={onCloseMobile}
+                              className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-semibold transition-all ${
+                                isSubActive
+                                  ? "bg-[#1b5cac] text-white font-bold shadow-xs"
+                                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                              }`}
+                            >
+                              {SubIcon && <SubIcon className="size-3.5 shrink-0" />}
+                              <span>{sub.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>
