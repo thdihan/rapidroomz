@@ -119,7 +119,7 @@ export function DateRangePicker({
             <span className="truncate">{buttonDisplayText}</span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 z-50 shadow-2xl border border-slate-200 rounded-2xl bg-white" align="start">
+        <PopoverContent className="w-auto p-0 z-[200] shadow-2xl border border-slate-200 rounded-2xl bg-white" align="start">
           {/* Header */}
           <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 rounded-t-2xl">
             <span className="text-sm font-bold text-slate-800 tracking-tight">

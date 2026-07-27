@@ -174,8 +174,8 @@ export default function PublicSinglePropertyPage({ params }: { params: Promise<{
       return;
     }
     setBookingRoom(room);
-    setCheckIn('');
-    setCheckOut('');
+    setCheckIn(urlCheckIn || '');
+    setCheckOut(urlCheckOut || '');
     setNoOfRooms(1);
     setBookingError('');
     setIsBookingModalOpen(true);
