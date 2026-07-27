@@ -19,6 +19,7 @@ import {
   FileText,
   Phone,
   MessageSquare,
+  CheckSquare,
 } from "lucide-react";
 
 export type UserRole = "admin" | "owner" | "user";
@@ -100,6 +101,7 @@ export default function DashboardSidebar({
         children: [
           { label: "About Us Content", href: "/dashboard/settings?tab=about", icon: FileText },
           { label: "Contact Info", href: "/dashboard/settings?tab=contact_info", icon: Phone },
+          { label: "Default Amenities", href: "/dashboard/settings?tab=amenities", icon: CheckSquare },
         ],
       },
       { label: "My Profile", href: "/dashboard/profile", icon: User },

@@ -35,17 +35,50 @@ export default function HotelForm({ initialData }: { initialData?: any }) {
     { id: "3", roomType: "Suite", name: "", capacity: 4, count: 0, publishedRate: "", agencyRate: "", images: [] as string[], uploading: false }
   ]);
 
-  const [amenities, setAmenities] = useState([
-    { id: "restaurant", label: "Restaurant", checked: false },
-    { id: "swimming_pool", label: "Swimming Pool", checked: false },
-    { id: "fitness_center", label: "Fitness Center", checked: false },
-    { id: "spa", label: "Spa", checked: false },
-    { id: "business_center", label: "Business Center", checked: false },
-    { id: "conference_rooms", label: "Conference Rooms", checked: false },
-    { id: "parking", label: "Parking", checked: false },
-    { id: "wifi", label: "Free WiFi", checked: false }
-  ]);
+  const [amenities, setAmenities] = useState<{ id: string; label: string; checked: boolean }[]>([]);
   const [customAmenity, setCustomAmenity] = useState("");
+
+  useEffect(() => {
+    const fetchDefaultAmenities = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+        const res = await fetch(`${apiUrl}/amenity?propertyType=hotel&isSuggested=false`);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          const loaded = json.data.map((a: any) => ({
+            id: a.name,
+            label: a.label,
+            checked: false
+          }));
+
+          if (initialData?.amenities) {
+            const dbAmenities = initialData.amenities.map((a: any) => a.name);
+            const merged = loaded.map((item: any) => ({
+              ...item,
+              checked: dbAmenities.includes(item.id)
+            }));
+            
+            initialData.amenities.forEach((dbItem: any) => {
+              if (!merged.some((m: any) => m.id === dbItem.name)) {
+                merged.push({
+                  id: dbItem.name,
+                  label: dbItem.label || dbItem.name.split(/[_-]/).filter(Boolean).map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
+                  checked: dbItem.isEnabled !== false
+                });
+              }
+            });
+            setAmenities(merged);
+          } else {
+            setAmenities(loaded);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching default amenities:", err);
+      }
+    };
+
+    fetchDefaultAmenities();
+  }, [initialData]);
 
   useEffect(() => {
     if (role === 'admin') {
@@ -64,11 +97,6 @@ export default function HotelForm({ initialData }: { initialData?: any }) {
       if (initialData.hotelInfo?.currencies) setCurrencies(initialData.hotelInfo.currencies);
       if (initialData.hotelInfo?.images) setImages(initialData.hotelInfo.images);
       if (initialData.hotelInfo?.ownerId) setOwnerId(initialData.hotelInfo.ownerId);
-      
-      if (initialData.amenities) {
-        const dbAmenities = initialData.amenities.map((a: any) => a.name);
-        setAmenities(prev => prev.map(a => ({ ...a, checked: dbAmenities.includes(a.id) })));
-      }
       
       if (initialData.rooms && initialData.rooms.length > 0) {
         setRooms(initialData.rooms.map((room: any) => ({

@@ -33,22 +33,57 @@ export default function ResortForm({ initialData }: { initialData?: any }) {
     { id: "3", roomType: "Pool Villa", occupancy: 4, count: 0, size: 0, price: 0, images: [] as string[], uploading: false }
   ]);
 
-  const [features, setFeatures] = useState([
-    { id: "beach", label: "Private Beach", checked: false },
-    { id: "pools", label: "Swimming Pools", checked: false },
-    { id: "spa", label: "Spa & Wellness Center", checked: false },
-    { id: "watersports", label: "Water Sports", checked: false },
-    { id: "kids_club", label: "Kids Club", checked: false },
-    { id: "restaurants", label: "Multiple Restaurants", checked: false }
-  ]);
+  const [features, setFeatures] = useState<{ id: string; label: string; checked: boolean }[]>([]);
+  const [activities, setActivities] = useState<{ id: string; label: string; checked: boolean }[]>([]);
 
-  const [activities, setActivities] = useState([
-    { id: "snorkeling", label: "Snorkeling", checked: false },
-    { id: "diving", label: "Scuba Diving", checked: false },
-    { id: "surfing", label: "Surfing", checked: false },
-    { id: "yoga", label: "Yoga Classes", checked: false },
-    { id: "cooking", label: "Cooking Classes", checked: false }
-  ]);
+  const [customFeature, setCustomFeature] = useState("");
+  const [customActivity, setCustomActivity] = useState("");
+
+  useEffect(() => {
+    const fetchDefaultAmenities = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+        const res = await fetch(`${apiUrl}/amenity?propertyType=resort&isSuggested=false`);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          const loadedFeatures = json.data.filter((a: any) => a.category === 'general').map((a: any) => ({ id: a.name, label: a.label, checked: false }));
+          const loadedActivities = json.data.filter((a: any) => a.category === 'outdoor').map((a: any) => ({ id: a.name, label: a.label, checked: false }));
+
+          const dbFeatures = initialData?.features || [];
+          const dbActivities = initialData?.activities || [];
+
+          const mergedFeatures = loadedFeatures.map((item: any) => ({ ...item, checked: dbFeatures.includes(item.id) }));
+          dbFeatures.forEach((name: string) => {
+            if (!mergedFeatures.some((m: any) => m.id === name)) {
+              mergedFeatures.push({
+                id: name,
+                label: name.split(/[_-]/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
+                checked: true
+              });
+            }
+          });
+
+          const mergedActivities = loadedActivities.map((item: any) => ({ ...item, checked: dbActivities.includes(item.id) }));
+          dbActivities.forEach((name: string) => {
+            if (!mergedActivities.some((m: any) => m.id === name)) {
+              mergedActivities.push({
+                id: name,
+                label: name.split(/[_-]/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
+                checked: true
+              });
+            }
+          });
+
+          setFeatures(mergedFeatures);
+          setActivities(mergedActivities);
+        }
+      } catch (err) {
+        console.error("Error fetching default amenities:", err);
+      }
+    };
+
+    fetchDefaultAmenities();
+  }, [initialData]);
 
   useEffect(() => {
     if (role === 'admin') {
@@ -67,14 +102,6 @@ export default function ResortForm({ initialData }: { initialData?: any }) {
       if (initialData.info?.images) setImages(initialData.info.images);
       if (initialData.info?.ownerId || initialData.ownerId) setOwnerId(initialData.info?.ownerId || initialData.ownerId);
       
-      if (initialData.amenities) {
-        // Resort features and activities were combined in amenities in the API output
-        // We'll try to check them against the IDs
-        const ids = initialData.amenities.filter((a: any) => a.isEnabled).map((a: any) => a._id);
-        setFeatures(prev => prev.map(a => ({ ...a, checked: ids.includes(a.id) })));
-        setActivities(prev => prev.map(a => ({ ...a, checked: ids.includes(a.id) })));
-      }
-      
       if (initialData.rooms && initialData.rooms.length > 0) {
         setRooms(initialData.rooms.map((room: any) => ({
           id: room._id,
@@ -89,6 +116,26 @@ export default function ResortForm({ initialData }: { initialData?: any }) {
       }
     }
   }, [initialData]);
+
+  const handleAddCustomFeature = () => {
+    if (customFeature.trim()) {
+      const id = customFeature.toLowerCase().replace(/\s+/g, '_');
+      if (!features.some(f => f.id === id)) {
+        setFeatures([...features, { id, label: customFeature.trim(), checked: true }]);
+      }
+      setCustomFeature("");
+    }
+  };
+
+  const handleAddCustomActivity = () => {
+    if (customActivity.trim()) {
+      const id = customActivity.toLowerCase().replace(/\s+/g, '_');
+      if (!activities.some(a => a.id === id)) {
+        setActivities([...activities, { id, label: customActivity.trim(), checked: true }]);
+      }
+      setCustomActivity("");
+    }
+  };
 
   const handleAddRoom = () => {
     setRooms([...rooms, { id: Date.now().toString(), roomType: "", occupancy: 1, count: 0, size: 0, price: 0, images: [], uploading: false }]);
@@ -490,7 +537,7 @@ export default function ResortForm({ initialData }: { initialData?: any }) {
             <Label className="text-base font-semibold mb-4 block flex items-center gap-2">
               <Building2 className="size-4" /> Resort Features
             </Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               {features.map((feature) => (
                 <div key={feature.id} className="flex items-center space-x-2">
                   <Checkbox
@@ -504,13 +551,25 @@ export default function ResortForm({ initialData }: { initialData?: any }) {
                 </div>
               ))}
             </div>
+            <div className="flex items-center gap-2 max-w-sm pt-2">
+              <Input
+                placeholder="Add custom resort feature"
+                value={customFeature}
+                onChange={(e) => setCustomFeature(e.target.value)}
+                className="h-9 text-xs"
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomFeature())}
+              />
+              <Button type="button" variant="secondary" onClick={handleAddCustomFeature} className="h-9 text-xs px-3">
+                Add
+              </Button>
+            </div>
           </div>
 
           <div>
             <Label className="text-base font-semibold mb-4 block flex items-center gap-2">
               <Palmtree className="size-4" /> Activities & Recreation
             </Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               {activities.map((activity) => (
                 <div key={activity.id} className="flex items-center space-x-2">
                   <Checkbox
@@ -523,6 +582,18 @@ export default function ResortForm({ initialData }: { initialData?: any }) {
                   </Label>
                 </div>
               ))}
+            </div>
+            <div className="flex items-center gap-2 max-w-sm pt-2">
+              <Input
+                placeholder="Add custom activity"
+                value={customActivity}
+                onChange={(e) => setCustomActivity(e.target.value)}
+                className="h-9 text-xs"
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomActivity())}
+              />
+              <Button type="button" variant="secondary" onClick={handleAddCustomActivity} className="h-9 text-xs px-3">
+                Add
+              </Button>
             </div>
           </div>
         </CardContent>

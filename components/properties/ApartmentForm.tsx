@@ -26,31 +26,57 @@ export default function ApartmentForm({ initialData }: { initialData?: any }) {
   const [owners, setOwners] = useState<any[]>([]);
   const [ownerId, setOwnerId] = useState("");
 
-  const [indoorAmenities, setIndoorAmenities] = useState([
-    { id: "wifi", label: "WiFi", checked: false },
-    { id: "ac", label: "Air Conditioning", checked: false },
-    { id: "kitchen", label: "Full Kitchen", checked: false },
-    { id: "entertainment", label: "Entertainment System", checked: false },
-    { id: "fireplace", label: "Fireplace", checked: false },
-    { id: "gym", label: "Private Gym", checked: false },
-    { id: "sauna", label: "Sauna", checked: false },
-  ]);
+  const [indoorAmenities, setIndoorAmenities] = useState<{ id: string; label: string; checked: boolean }[]>([]);
+  const [buildingFeatures, setBuildingFeatures] = useState<{ id: string; label: string; checked: boolean }[]>([]);
 
-  const [outdoorFeatures, setOutdoorFeatures] = useState([
-    { id: "pool", label: "Private Pool", checked: false },
-    { id: "garden", label: "Garden", checked: false },
-    { id: "bbq", label: "BBQ Area", checked: false },
-    { id: "parking", label: "Private Parking", checked: false },
-    { id: "beach", label: "Beach Access", checked: false },
-    { id: "dining", label: "Outdoor Dining", checked: false },
-  ]);
+  const [customIndoor, setCustomIndoor] = useState("");
+  const [customBuilding, setCustomBuilding] = useState("");
 
-  const [buildingFeatures, setBuildingFeatures] = useState([
-    { id: "security", label: "24/7 Security", checked: false },
-    { id: "elevator", label: "Elevator", checked: false },
-    { id: "concierge", label: "Concierge Service", checked: false },
-    { id: "maintenance", label: "24/7 Maintenance", checked: false },
-  ]);
+  useEffect(() => {
+    const fetchDefaultAmenities = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+        const res = await fetch(`${apiUrl}/amenity?propertyType=apartment&isSuggested=false`);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          const loadedIndoor = json.data.filter((a: any) => a.category !== 'service').map((a: any) => ({ id: a.name, label: a.label, checked: false }));
+          const loadedBuilding = json.data.filter((a: any) => a.category === 'service').map((a: any) => ({ id: a.name, label: a.label, checked: false }));
+
+          const dbAmenities = initialData?.amenities || [];
+          const dbBuilding = initialData?.buildingFeatures || [];
+
+          const mergedIndoor = loadedIndoor.map((item: any) => ({ ...item, checked: dbAmenities.includes(item.id) }));
+          dbAmenities.forEach((name: string) => {
+            if (!mergedIndoor.some((m: any) => m.id === name)) {
+              mergedIndoor.push({
+                id: name,
+                label: name.split(/[_-]/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
+                checked: true
+              });
+            }
+          });
+
+          const mergedBuilding = loadedBuilding.map((item: any) => ({ ...item, checked: dbBuilding.includes(item.id) }));
+          dbBuilding.forEach((name: string) => {
+            if (!mergedBuilding.some((m: any) => m.id === name)) {
+              mergedBuilding.push({
+                id: name,
+                label: name.split(/[_-]/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
+                checked: true
+              });
+            }
+          });
+
+          setIndoorAmenities(mergedIndoor);
+          setBuildingFeatures(mergedBuilding);
+        }
+      } catch (err) {
+        console.error("Error fetching default amenities:", err);
+      }
+    };
+
+    fetchDefaultAmenities();
+  }, [initialData]);
 
   useEffect(() => {
     if (role === 'admin') {
@@ -68,18 +94,31 @@ export default function ApartmentForm({ initialData }: { initialData?: any }) {
     if (initialData) {
       if (initialData.images) setImages(initialData.images);
       if (initialData.ownerId) setOwnerId(initialData.ownerId);
-      
-      if (initialData.amenities) {
-        setIndoorAmenities(prev => prev.map(a => ({ ...a, checked: initialData.amenities.includes(a.id) })));
-      }
-      if (initialData.buildingFeatures) {
-        setBuildingFeatures(prev => prev.map(a => ({ ...a, checked: initialData.buildingFeatures.includes(a.id) })));
-      }
     }
   }, [initialData]);
 
   const handleToggleAmenity = (setState: React.Dispatch<React.SetStateAction<any[]>>, state: any[], id: string, checked: boolean) => {
     setState(state.map(a => a.id === id ? { ...a, checked } : a));
+  };
+
+  const handleAddCustomIndoor = () => {
+    if (customIndoor.trim()) {
+      const id = customIndoor.toLowerCase().replace(/\s+/g, '_');
+      if (!indoorAmenities.some(a => a.id === id)) {
+        setIndoorAmenities([...indoorAmenities, { id, label: customIndoor.trim(), checked: true }]);
+      }
+      setCustomIndoor("");
+    }
+  };
+
+  const handleAddCustomBuilding = () => {
+    if (customBuilding.trim()) {
+      const id = customBuilding.toLowerCase().replace(/\s+/g, '_');
+      if (!buildingFeatures.some(a => a.id === id)) {
+        setBuildingFeatures([...buildingFeatures, { id, label: customBuilding.trim(), checked: true }]);
+      }
+      setCustomBuilding("");
+    }
   };
 
   const handleImageUpload = async (file: File) => {
@@ -366,7 +405,7 @@ export default function ApartmentForm({ initialData }: { initialData?: any }) {
             <Label className="text-base font-semibold mb-4 block flex items-center gap-2">
               <Home className="size-4" /> Indoor Amenities
             </Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               {indoorAmenities.map((amenity) => (
                 <div key={amenity.id} className="flex items-center space-x-2">
                   <Checkbox
@@ -380,13 +419,25 @@ export default function ApartmentForm({ initialData }: { initialData?: any }) {
                 </div>
               ))}
             </div>
+            <div className="flex items-center gap-2 max-w-sm pt-2">
+              <Input
+                placeholder="Add custom indoor amenity"
+                value={customIndoor}
+                onChange={(e) => setCustomIndoor(e.target.value)}
+                className="h-9 text-xs"
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomIndoor())}
+              />
+              <Button type="button" variant="secondary" onClick={handleAddCustomIndoor} className="h-9 text-xs px-3">
+                Add
+              </Button>
+            </div>
           </div>
 
           <div>
             <Label className="text-base font-semibold mb-4 block flex items-center gap-2">
               <Building className="size-4" /> Building Features
             </Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               {buildingFeatures.map((feature) => (
                 <div key={feature.id} className="flex items-center space-x-2">
                   <Checkbox
@@ -399,6 +450,18 @@ export default function ApartmentForm({ initialData }: { initialData?: any }) {
                   </Label>
                 </div>
               ))}
+            </div>
+            <div className="flex items-center gap-2 max-w-sm pt-2">
+              <Input
+                placeholder="Add custom building feature"
+                value={customBuilding}
+                onChange={(e) => setCustomBuilding(e.target.value)}
+                className="h-9 text-xs"
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomBuilding())}
+              />
+              <Button type="button" variant="secondary" onClick={handleAddCustomBuilding} className="h-9 text-xs px-3">
+                Add
+              </Button>
             </div>
           </div>
         </CardContent>

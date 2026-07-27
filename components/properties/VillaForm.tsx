@@ -26,32 +26,75 @@ export default function VillaForm({ initialData }: { initialData?: any }) {
   const [owners, setOwners] = useState<any[]>([]);
   const [ownerId, setOwnerId] = useState("");
 
-  const [indoorAmenities, setIndoorAmenities] = useState([
-    { id: "wifi", label: "WiFi", checked: false },
-    { id: "ac", label: "Air Conditioning", checked: false },
-    { id: "kitchen", label: "Full Kitchen", checked: false },
-    { id: "entertainment", label: "Entertainment System", checked: false },
-    { id: "fireplace", label: "Fireplace", checked: false },
-    { id: "gym", label: "Private Gym", checked: false },
-    { id: "sauna", label: "Sauna", checked: false },
-  ]);
+  const [indoorAmenities, setIndoorAmenities] = useState<{ id: string; label: string; checked: boolean }[]>([]);
+  const [outdoorFeatures, setOutdoorFeatures] = useState<{ id: string; label: string; checked: boolean }[]>([]);
+  const [services, setServices] = useState<{ id: string; label: string; checked: boolean }[]>([]);
 
-  const [outdoorFeatures, setOutdoorFeatures] = useState([
-    { id: "pool", label: "Private Pool", checked: false },
-    { id: "garden", label: "Garden", checked: false },
-    { id: "bbq", label: "BBQ Area", checked: false },
-    { id: "parking", label: "Private Parking", checked: false },
-    { id: "beach", label: "Beach Access", checked: false },
-    { id: "dining", label: "Outdoor Dining", checked: false },
-  ]);
+  const [customIndoor, setCustomIndoor] = useState("");
+  const [customOutdoor, setCustomOutdoor] = useState("");
+  const [customService, setCustomService] = useState("");
 
-  const [services, setServices] = useState([
-    { id: "housekeeping", label: "Daily Housekeeping", checked: false },
-    { id: "butler", label: "Butler Service", checked: false },
-    { id: "chef", label: "Private Chef", checked: false },
-    { id: "security", label: "24/7 Security", checked: false },
-    { id: "concierge", label: "Concierge Service", checked: false },
-  ]);
+  useEffect(() => {
+    const fetchDefaultAmenities = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+        const res = await fetch(`${apiUrl}/amenity?propertyType=villa&isSuggested=false`);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          const loadedIndoor = json.data.filter((a: any) => a.category === 'indoor').map((a: any) => ({ id: a.name, label: a.label, checked: false }));
+          const loadedOutdoor = json.data.filter((a: any) => a.category === 'outdoor').map((a: any) => ({ id: a.name, label: a.label, checked: false }));
+          const loadedService = json.data.filter((a: any) => a.category === 'service').map((a: any) => ({ id: a.name, label: a.label, checked: false }));
+          const loadedGeneral = json.data.filter((a: any) => a.category === 'general').map((a: any) => ({ id: a.name, label: a.label, checked: false }));
+          loadedIndoor.push(...loadedGeneral);
+
+          const dbIndoor = initialData?.indoorAmenities || [];
+          const dbOutdoor = initialData?.outdoorFeatures || [];
+          const dbServices = initialData?.services || [];
+
+          const mergedIndoor = loadedIndoor.map((item: any) => ({ ...item, checked: dbIndoor.includes(item.id) }));
+          dbIndoor.forEach((name: string) => {
+            if (!mergedIndoor.some((m: any) => m.id === name)) {
+              mergedIndoor.push({
+                id: name,
+                label: name.split(/[_-]/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
+                checked: true
+              });
+            }
+          });
+
+          const mergedOutdoor = loadedOutdoor.map((item: any) => ({ ...item, checked: dbOutdoor.includes(item.id) }));
+          dbOutdoor.forEach((name: string) => {
+            if (!mergedOutdoor.some((m: any) => m.id === name)) {
+              mergedOutdoor.push({
+                id: name,
+                label: name.split(/[_-]/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
+                checked: true
+              });
+            }
+          });
+
+          const mergedService = loadedService.map((item: any) => ({ ...item, checked: dbServices.includes(item.id) }));
+          dbServices.forEach((name: string) => {
+            if (!mergedService.some((m: any) => m.id === name)) {
+              mergedService.push({
+                id: name,
+                label: name.split(/[_-]/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '),
+                checked: true
+              });
+            }
+          });
+
+          setIndoorAmenities(mergedIndoor);
+          setOutdoorFeatures(mergedOutdoor);
+          setServices(mergedService);
+        }
+      } catch (err) {
+        console.error("Error fetching default amenities:", err);
+      }
+    };
+
+    fetchDefaultAmenities();
+  }, [initialData]);
 
   useEffect(() => {
     if (role === 'admin') {
@@ -69,21 +112,41 @@ export default function VillaForm({ initialData }: { initialData?: any }) {
     if (initialData) {
       if (initialData.images) setImages(initialData.images);
       if (initialData.ownerId) setOwnerId(initialData.ownerId);
-      
-      if (initialData.indoorAmenities) {
-        setIndoorAmenities(prev => prev.map(a => ({ ...a, checked: initialData.indoorAmenities.includes(a.id) })));
-      }
-      if (initialData.outdoorFeatures) {
-        setOutdoorFeatures(prev => prev.map(a => ({ ...a, checked: initialData.outdoorFeatures.includes(a.id) })));
-      }
-      if (initialData.services) {
-        setServices(prev => prev.map(a => ({ ...a, checked: initialData.services.includes(a.id) })));
-      }
     }
   }, [initialData]);
 
   const handleToggleAmenity = (setState: React.Dispatch<React.SetStateAction<any[]>>, state: any[], id: string, checked: boolean) => {
     setState(state.map(a => a.id === id ? { ...a, checked } : a));
+  };
+
+  const handleAddCustomIndoor = () => {
+    if (customIndoor.trim()) {
+      const id = customIndoor.toLowerCase().replace(/\s+/g, '_');
+      if (!indoorAmenities.some(a => a.id === id)) {
+        setIndoorAmenities([...indoorAmenities, { id, label: customIndoor.trim(), checked: true }]);
+      }
+      setCustomIndoor("");
+    }
+  };
+
+  const handleAddCustomOutdoor = () => {
+    if (customOutdoor.trim()) {
+      const id = customOutdoor.toLowerCase().replace(/\s+/g, '_');
+      if (!outdoorFeatures.some(a => a.id === id)) {
+        setOutdoorFeatures([...outdoorFeatures, { id, label: customOutdoor.trim(), checked: true }]);
+      }
+      setCustomOutdoor("");
+    }
+  };
+
+  const handleAddCustomService = () => {
+    if (customService.trim()) {
+      const id = customService.toLowerCase().replace(/\s+/g, '_');
+      if (!services.some(a => a.id === id)) {
+        setServices([...services, { id, label: customService.trim(), checked: true }]);
+      }
+      setCustomService("");
+    }
   };
 
   const handleImageUpload = async (file: File) => {
@@ -371,7 +434,7 @@ export default function VillaForm({ initialData }: { initialData?: any }) {
             <Label className="text-base font-semibold mb-4 block flex items-center gap-2">
               <Home className="size-4" /> Indoor Amenities
             </Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               {indoorAmenities.map((amenity) => (
                 <div key={amenity.id} className="flex items-center space-x-2">
                   <Checkbox
@@ -385,13 +448,25 @@ export default function VillaForm({ initialData }: { initialData?: any }) {
                 </div>
               ))}
             </div>
+            <div className="flex items-center gap-2 max-w-sm pt-2">
+              <Input
+                placeholder="Add custom indoor amenity"
+                value={customIndoor}
+                onChange={(e) => setCustomIndoor(e.target.value)}
+                className="h-9 text-xs"
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomIndoor())}
+              />
+              <Button type="button" variant="secondary" onClick={handleAddCustomIndoor} className="h-9 text-xs px-3">
+                Add
+              </Button>
+            </div>
           </div>
 
           <div>
             <Label className="text-base font-semibold mb-4 block flex items-center gap-2">
               <TreePine className="size-4" /> Outdoor Features
             </Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               {outdoorFeatures.map((feature) => (
                 <div key={feature.id} className="flex items-center space-x-2">
                   <Checkbox
@@ -405,13 +480,25 @@ export default function VillaForm({ initialData }: { initialData?: any }) {
                 </div>
               ))}
             </div>
+            <div className="flex items-center gap-2 max-w-sm pt-2">
+              <Input
+                placeholder="Add custom outdoor feature"
+                value={customOutdoor}
+                onChange={(e) => setCustomOutdoor(e.target.value)}
+                className="h-9 text-xs"
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomOutdoor())}
+              />
+              <Button type="button" variant="secondary" onClick={handleAddCustomOutdoor} className="h-9 text-xs px-3">
+                Add
+              </Button>
+            </div>
           </div>
 
           <div>
             <Label className="text-base font-semibold mb-4 block flex items-center gap-2">
               <Users className="size-4" /> Staff & Services
             </Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               {services.map((service) => (
                 <div key={service.id} className="flex items-center space-x-2">
                   <Checkbox
@@ -424,6 +511,18 @@ export default function VillaForm({ initialData }: { initialData?: any }) {
                   </Label>
                 </div>
               ))}
+            </div>
+            <div className="flex items-center gap-2 max-w-sm pt-2">
+              <Input
+                placeholder="Add custom staff / service"
+                value={customService}
+                onChange={(e) => setCustomService(e.target.value)}
+                className="h-9 text-xs"
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomService())}
+              />
+              <Button type="button" variant="secondary" onClick={handleAddCustomService} className="h-9 text-xs px-3">
+                Add
+              </Button>
             </div>
           </div>
         </CardContent>
