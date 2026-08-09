@@ -28,6 +28,7 @@ const Footer = () => {
                                 { name: "About Us", href: "/about" },
                                 { name: "Contact", href: "/contact" },
                                 { name: "FAQ", href: "/contact" },
+                                { name: "List your property free", href: "/register-owner" },
                             ].map((item) => (
                                 <li key={item.name}>
                                     <Link

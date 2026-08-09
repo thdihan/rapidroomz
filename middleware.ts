@@ -6,7 +6,7 @@ export default auth((req) => {
   const { nextUrl } = req;
   const role = (req.auth?.user as any)?.role;
 
-  const isAuthRoute = ["/login", "/signup"].includes(nextUrl.pathname);
+  const isAuthRoute = ["/login", "/signup", "/register-owner"].includes(nextUrl.pathname);
   const isDashboardRoute = nextUrl.pathname.startsWith("/dashboard");
   const isProfileRoute = nextUrl.pathname === "/profile";
 
@@ -34,6 +34,6 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/login", "/signup", "/profile", "/dashboard/:path*"],
+  matcher: ["/login", "/signup", "/register-owner", "/profile", "/dashboard/:path*"],
 };
 

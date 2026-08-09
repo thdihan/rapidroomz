@@ -30,7 +30,7 @@ const features = [
 
 export default async function Home() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
-    
+
     // Fetch all properties
     const [hotelRes, villaRes, aptRes, resortRes] = await Promise.all([
         fetch(`${apiUrl}/hotel`, { next: { revalidate: 0 } }).catch(() => null),
@@ -172,6 +172,34 @@ export default async function Home() {
                             No featured properties available at the moment.
                         </div>
                     )}
+                </div>
+            </section>
+
+            {/* Owner CTA Banner */}
+            <section className="container py-8">
+                <div className="relative rounded-2xl overflow-hidden bg-primary text-primary-foreground p-8 md:p-12 shadow-lg">
+                    {/* Background decoration */}
+                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1600&h=800&fit=crop')] bg-cover bg-center opacity-10" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#194B7C] via-[#0168AA] to-[#0168AA]/80" />
+
+                    <div className="relative max-w-4xl text-left z-10">
+                        <span className="text-xs font-semibold uppercase tracking-wider bg-white/20 text-white px-3 py-1 rounded-full">
+                            List Your Property
+                        </span>
+                        <h2 className="text-3xl md:text-4xl font-display font-bold mt-4 mb-3">
+                            List Your Property Free
+                        </h2>
+                        <p className="text-base md:text-lg text-primary-foreground/80 mb-6 max-w-4xl">
+                            List your hotels, villas, apartments, or resorts for free. Reach millions of travelers, manage your inventory with ease, and secure instant bookings.
+                        </p>
+                        <Link
+                            href="/register-owner"
+                            className="inline-flex items-center justify-center px-6 py-3 bg-white text-[#194B7C] font-semibold rounded-md shadow-md hover:bg-gray-100 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                            <span>Register as an owner</span>
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                    </div>
                 </div>
             </section>
 
